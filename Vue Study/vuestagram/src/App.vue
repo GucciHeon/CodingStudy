@@ -1,17 +1,21 @@
 <template>
   <div class="header">
     <ul class="header-button-left">
-      <li>Cancel</li>
+      <li @click="step--">Cancel</li>
     </ul>
     <ul class="header-button-right">
-      <li>Next</li>
+      <li v-if="step == 1" @click="step++">Next</li>
+      <li v-if="step == 2" @click="publish">발행</li>
     </ul>
     <img src="./assets/logo.png" class="logo" />
   </div>
-  <Container :Data="Data" />
+  <Container :image="image" :Data="Data" :step="step" />
+
+  <button @click="more">더보기</button>
+
   <div class="footer">
     <ul class="footer-button-plus">
-      <input type="file" id="file" class="inputfile" />
+      <input @change="upload" type="file" id="file" class="inputfile" />
       <label for="file" class="input-plus">+</label>
     </ul>
   </div>
@@ -20,17 +24,56 @@
 <script>
 import postData from "./assets/postdata.js";
 import Container from "./components/Container.vue";
+import axios from "axios";
+
+axios.post();
 
 export default {
   name: "VueApp",
   components: {
     Container,
   },
-  data(){
+  data() {
     return {
-      Data : postData,
-    }
-  }
+      Data: postData,
+      moreClick: 0,
+      step: 0,
+      image: "",
+    };
+  },
+  methods: {
+    publish() {
+      var myPost = {
+        name: "Kim Hyun",
+        userImage: "https://placeimg.com/100/100/arch",
+        postImage: this.image,
+        likes: 36,
+        date: "May 15",
+        liked: false,
+        content: "오늘 무엇을 했냐면요 아무것도 안했어요 ?",
+        filter: "perpetua",
+      };
+      this.Data.unshift(myPost);
+      this.step = 0;
+    },
+    more() {
+      axios
+        .get(`https://codingapple1.github.io/vue/more${this.moreClick}.json`)
+        .then((result) => {
+          console.log(result.data);
+          this.Data.push(result.data);
+          this.moreClick++;
+        });
+    },
+    upload(e) {
+      let 파일 = e.target.files;
+      console.log(파일[0].type);
+      let url = URL.createObjectURL(파일[0]);
+      console.log(url);
+      this.image = url;
+      this.step++;
+    },
+  },
 };
 </script>
 
